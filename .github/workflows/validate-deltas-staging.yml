@@ -53,8 +53,7 @@ jobs:
           
       - name: Validate Delta Package to Target Org
         run: |
-            sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME -p deploy -l RunSpecifiedTests -r HelloWorldTestClass -g --coverageformatters text --verbose --checkonly
-
+              sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME -p deploy -l RunSpecifiedTests -r HelloWorldTestClass -g --coverageformatters text --verbose 
       - name: Push Changes to Repository
         if: ${{ success() }}
         run: |
