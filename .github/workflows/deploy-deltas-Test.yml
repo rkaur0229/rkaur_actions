@@ -4,7 +4,7 @@
 # Update the TARGET_BRANCH to the branch you want feature branches to be merged into
 # Update the SOURCE_DIR to the directory you want acu-pack to create a delta package from
 
-name: Deploy Deltas to UAT
+name: Deploy Deltas to Test Environment
 
 on:
   push:
