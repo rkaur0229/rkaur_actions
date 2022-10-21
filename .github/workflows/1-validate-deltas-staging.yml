@@ -1,0 +1,61 @@
+# This workflow utilizes acu-pack to create a delta package containing only what was changed
+# Feature branch is automatically merged into TARGET_BRANCH if Salesforce deployment is successful
+# Update the TARGET_BRANCH to the branch you want feature branches to be merged into
+# Update the SOURCE_DIR to the directory you want acu-pack to create a delta package from
+
+name: Validate Deltas to Staging1
+
+on:
+  workflow_dispatch:
+  
+env:
+  SFDX_AUDIENCE_URL: https://test.salesforce.com # Use https://login.salesforce.com for production instances. Use https://test.salesforce.com for sandboxes
+  SALESFORCE_ORG_USERNAME: navdeep.singh@salesforce.com.csgdevops.nstaging
+  SALESFORCE_ORG_URL: https://csg-devops-bootcamp--nstaging.sandbox.my.salesforce.com
+  SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY_STAGING }} # SFDX App consumer key from target org
+  TARGET_BRANCH: main # Git branch to merge feature branch into
+  SOURCE_DIR: force-app # Directory you want acu-pack to create a delta package from
+  HOME: /root # Needed to run SFDX plugin commands
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    container:
+     - image: jfgarcia268/vlocity_sfdx:jenkins-core
+    
+    steps:
+      - name: Adding GitHub Workspace as safe directory # Needed to setup Git user
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+      
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          
+      - name: Setup Git User
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+      
+      - name: Authenticate Salesforce Org
+        run: |
+          echo "${{ secrets.JWTKEY }}" > server.key
+          sfdx force:auth:jwt:grant --jwtkeyfile server.key --clientid "${SALESFORCE_CONSUMER_KEY}" --username "${SALESFORCE_ORG_USERNAME}" --instanceurl "${SALESFORCE_ORG_URL}"
+
+      - name: Merge develop branch into main Branch
+        run: |
+          git fetch origin
+          git merge --no-ff origin/develop -m "Merge ${GITHUB_REF#refs/heads/} into ${TARGET_BRANCH}" --allow-unrelated-histories
+          
+      - name: Generate Deploy Package
+        run: |
+          git --no-pager diff HEAD^ --name-status --no-renames > git_diff.txt
+          sfdx acu-pack:source:delta:git -g git_diff.txt -s "${SOURCE_DIR}" -d deploy
+          
+      - name: Validate Delta Package to Target Org
+        run: |
+            sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME -p deploy -l RunSpecifiedTests -r HelloWorldTestClass -g --coverageformatters text --verbose --checkonly
+
+      - name: Push Changes to Repository
+        if: ${{ success() }}
+        run: |
+          git push -u origin --force "${TARGET_BRANCH}"
