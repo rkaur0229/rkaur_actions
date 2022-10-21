@@ -16,7 +16,7 @@ env:
   SALESFORCE_ORG_USERNAME: navdeep.singh@salesforce.com.csgdevops.nuat4
   SALESFORCE_ORG_URL: https://csg-devops-bootcamp--nuat4.sandbox.my.salesforce.com
   SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY_UAT }} # SFDX App consumer key from target org
-  TARGET_BRANCH: develop # Git branch to merge feature branch into
+  TARGET_BRANCH: rel_1.0 # Git branch to merge feature branch into
   SOURCE_DIR: force-app # Directory you want acu-pack to create a delta package from
   HOME: /root # Needed to run SFDX plugin commands
 
@@ -56,7 +56,7 @@ jobs:
           
       - name: Deploy Delta Package to Target Org
         run: |
-          sfdx force:source:deploy -p deploy -u "${SALESFORCE_ORG_USERNAME}"
+          sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME -p deploy -l RunSpecifiedTests -r HelloWorldTestClass -g --coverageformatters text --verbose
 
       - name: Push Changes to Repository
         if: ${{ success() }}
