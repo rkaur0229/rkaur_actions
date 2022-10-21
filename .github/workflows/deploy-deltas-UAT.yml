@@ -13,7 +13,7 @@ on:
   
 env:
   SFDX_AUDIENCE_URL: https://test.salesforce.com # Use https://login.salesforce.com for production instances. Use https://test.salesforce.com for sandboxes
-  SALESFORCE_ORG_USERNAME: navdeep.singh@salesforce.com.csgdevops.nuat4
+  SALESFORCE_ORG_USERNAME: rkaur0229@gmail.com.test
   SALESFORCE_ORG_URL: https://csg-devops-bootcamp--nuat4.sandbox.my.salesforce.com
   SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY_UAT }} # SFDX App consumer key from target org
   TARGET_BRANCH: develop # Git branch to merge feature branch into
