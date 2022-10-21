@@ -56,8 +56,7 @@ jobs:
           
       - name: Deploy Delta Package to Target Org
         run: |
-          sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME -p deploy -l RunSpecifiedTests -r HelloWorldTestClass -g --coverageformatters text --verbose
-
+          sfdx force:source:deploy -u $SALESFORCE_ORG_USERNAME 
       - name: Push Changes to Repository
         if: ${{ success() }}
         run: |
